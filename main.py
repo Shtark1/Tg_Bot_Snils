@@ -244,6 +244,8 @@ async def check_prov(message: Message):
             await message.answer(MESSAGES['input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
             state = dp.current_state(user=message.from_user.id)
             await state.set_state(StatesUSERS.all()[2])
+        else:
+            await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
     except:
         await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
 
