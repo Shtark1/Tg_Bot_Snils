@@ -96,8 +96,7 @@ def search(key_code):
 CONFIG = {
     "TOKEN": "",
     "ID_CHANNEL": ,
-    "YOOPAYMENT": "",
-    "PRICE_SUB": 12344  # целое число последние две цифры это копейки
+    "YOOPAYMENT": ""
 }
 
 # СООБЩЕНИЯ
@@ -234,16 +233,20 @@ async def check_sub_q(message: Message):
 # =================================================
 @dp.message_handler(lambda message: message.text.lower() == 'сделать проверку')
 async def check_prov(message: Message):
-    if db.select_test_check(message.from_user.id) >= 1:
-        await message.answer(MESSAGES['input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
-        state = dp.current_state(user=message.from_user.id)
-        await state.set_state(StatesUSERS.all()[2])
-
     try:
-        if time_sub_day(db.select_profile(message.from_user.id)[2]):
+        if db.select_test_check(message.from_user.id) >= 1:
             await message.answer(MESSAGES['input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
             state = dp.current_state(user=message.from_user.id)
             await state.set_state(StatesUSERS.all()[2])
+
+        elif time_sub_day(db.select_profile(message.from_user.id)[2]):
+            await message.answer(MESSAGES['input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
+            state = dp.current_state(user=message.from_user.id)
+            await state.set_state(StatesUSERS.all()[2])
+
+        else:
+            await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
+
     except:
         await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
 
@@ -255,13 +258,20 @@ async def check_prov(message: Message, state: FSMContext):
         await message.answer(MESSAGES['start'], reply_markup=BUTTON_TYPES["BTN_HOME"])
         await state.finish()
     elif re.match(r'^\d{10,15}$', message.text):
-        a = db.update_test_check(message.from_user.id)
-        await message.answer(f"Успех!\nУ вас осталось {a} бесплатных проверок", reply_markup=BUTTON_TYPES["BTN_HOME"])
+        a = db.select_test_check(message.from_user.id)
+        if db.select_test_check(message.from_user.id) >= 1:
+            a = db.update_test_check(message.from_user.id)
+
+        await message.answer(f"У вас осталось {a} бесплатных проверок", reply_markup=BUTTON_TYPES["BTN_HOME"])
         # ищем данные в бд mentions
         all_info = search(message.text)
-        for info in all_info:
-            await message.answer(text=info, reply_markup=BUTTON_TYPES["BTN_HOME"])
-        await state.finish() 
+        if all_info == "Совпадений с указанным ИНН/ОГРН/ОГРНИП/СНИЛС не найдено.":
+            await message.answer(text=all_info, reply_markup=BUTTON_TYPES["BTN_HOME"])
+        else:
+            for info in all_info:
+                await message.answer(text=info, reply_markup=BUTTON_TYPES["BTN_HOME"])
+
+        await state.finish()
     else:
         await message.answer(MESSAGES['no_input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
         state = dp.current_state(user=message.from_user.id)
@@ -273,10 +283,9 @@ async def check_prov(message: Message, state: FSMContext):
 # ==================================================
 @dp.message_handler(lambda message: message.text.lower() == 'купить подписку')
 async def check_prov(message: Message):
-    # await message.answer(MESSAGES['info_sub'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
     label = "Описание"
 
-    PRICE = LabeledPrice(label=label, amount=CONFIG["PRICE_SUB"])
+    PRICE = LabeledPrice(label=label, amount=19099)
 
     await bot.send_invoice(
         chat_id=message.chat.id,
@@ -318,7 +327,7 @@ async def process_pay(message: Message):
     time_sub = int(time.time()) + days_to_secons(days)
     db.set_time_sub(message.from_user.id, time_sub)
 
-    await bot.send_message(message.from_user.id, "Оплата прошла успешна!\nВам доступна подписка на месяц")
+    await bot.send_message(message.from_user.id, "Оплптп прошла успешна!\nВам доступна подписка на месяц")
 
 
 # ==================================================
