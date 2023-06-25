@@ -238,6 +238,7 @@ async def check_prov(message: Message):
             await message.answer(MESSAGES['input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
             state = dp.current_state(user=message.from_user.id)
             await state.set_state(StatesUSERS.all()[2])
+<<<<<<< HEAD
 
         elif time_sub_day(db.select_profile(message.from_user.id)[2]):
             await message.answer(MESSAGES['input_inn'], reply_markup=BUTTON_TYPES["BTN_CANCEL"])
@@ -247,6 +248,10 @@ async def check_prov(message: Message):
         else:
             await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
 
+=======
+        else:
+            await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
+>>>>>>> 3cf2482e96a004ce97e8278ac57772c83f57b577
     except:
         await message.answer(MESSAGES['not_check'], reply_markup=BUTTON_TYPES["BTN_HOME"])
 
